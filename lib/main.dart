@@ -47,9 +47,6 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   final List<Transaction> _transactions = [
-    Transaction(id: '0', title: 'hmmm', value: 100, date: DateTime.now().subtract(Duration(days: 3))),
-    Transaction(id: '1', title: 'seloko', value: 270, date: DateTime.now().subtract(Duration(days: 5))),
-    Transaction(id: '1', title: 'aaa', value: 50, date: DateTime.now().subtract(Duration(days: 8)))
   ];
 
   List<Transaction> get _recentTransactions{
@@ -58,17 +55,23 @@ class _HomePageState extends State<HomePage> {
     }).toList();
   }
 
-  _addTransaction(String titulo, double valor){
+  _addTransaction(String titulo, double valor, DateTime data){
     final newTransaction = Transaction(
       id: Random().nextDouble().toString(),
       title: titulo,
       value: valor,
-      date: DateTime.now()
+      date: data
     );
     setState(() {
       _transactions.add(newTransaction);
     });
     Navigator.of(context).pop();
+  }
+
+  _removeTransaction(String id){
+    setState(() {
+      _transactions.removeWhere((tr) => tr.id == id);
+    });
   }
   
   _openTransactionForm(BuildContext context){
@@ -84,7 +87,7 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Despesas pessoais"), 
+        title: const Text("Despesas pessoais - By: PPeres"), 
         backgroundColor: Colors.deepPurpleAccent,
         actions: [
           IconButton(
@@ -93,12 +96,12 @@ class _HomePageState extends State<HomePage> {
           )
         ],
       ),
-    
+
       body: SingleChildScrollView(
         child: Column(
         children: [
           Chart(_recentTransactions),
-          TransactionList(_transactions),
+          TransactionList(_transactions, _removeTransaction),
         ],
       ),
       ),

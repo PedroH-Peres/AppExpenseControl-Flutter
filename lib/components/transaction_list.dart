@@ -7,13 +7,13 @@ import '../models/transaction.dart';
 
 class TransactionList extends StatelessWidget {
   final List<Transaction> transactions;
-
-  TransactionList(this.transactions);
+  final Function(String) onRemove;
+  TransactionList(this.transactions, this.onRemove);
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 500,
+      height: 460,
       child: transactions.isEmpty ?
         Column(
           children: [
@@ -29,39 +29,26 @@ class TransactionList extends StatelessWidget {
         itemBuilder: (ctx, index) {
           final tr = transactions[index];
           return Card(
-                    elevation: 2,
-                    child: Row(
-                      children: [
-                        Container(
-                          margin: EdgeInsets.symmetric(vertical: 10 , horizontal: 15),
-                          decoration: BoxDecoration(
-                            border: Border.all(
-                            color: Colors.deepPurpleAccent, 
-                            width: 2
-                            )
-                          ),
-                          padding: const EdgeInsets.all(10),
-                          child: Text(
-                            'R\$ ${tr.value.toStringAsFixed(2)}',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 20,
-                              color: Colors.deepPurpleAccent
-                            ),
-                            ),
-                        ),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(tr.title,
-                              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                            ),
-                            Text(DateFormat("d MMM  y").format(tr.date), style: TextStyle(color: Colors.grey),)
-                          ],
-                        )
-                      ],
-                    )
-                  );
+            elevation: 5,
+            margin: EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+            child: ListTile(
+              leading: CircleAvatar(
+                backgroundColor: Colors.deepPurpleAccent,
+                radius: 30,
+                child: Padding(
+                  padding: const EdgeInsets.all(3), 
+                  child: FittedBox(child: Text('R\$${tr.value.toStringAsFixed(2)}', style: TextStyle(color: Colors.white),)),
+                  ),
+              ),
+              title: Container(alignment: Alignment.centerLeft,height: 28, child: FittedBox(child: Text(tr.title, style: Theme.of(context).textTheme.headline6,)),),
+              subtitle: Text(DateFormat('d MMM y').format(tr.date)),
+              trailing: IconButton(
+                icon: Icon(Icons.delete), 
+                color: Theme.of(context).errorColor,
+                onPressed: () => onRemove(tr.id),
+              ),
+            )
+          );
         },
       ),
     );
