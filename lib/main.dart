@@ -6,6 +6,7 @@ import 'package:expenses/components/transaction_form.dart';
 import 'package:expenses/components/transaction_list.dart';
 import 'package:expenses/models/transaction.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
 
@@ -46,8 +47,8 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  final List<Transaction> _transactions = [
-  ];
+  final List<Transaction> _transactions = [];
+  bool _showChart = false;
 
   List<Transaction> get _recentTransactions{
     return _transactions.where((tr){
@@ -85,25 +86,49 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Despesas pessoais - By: PPeres"), 
+    final mediaQuery = MediaQuery.of(context);
+    bool isLandscape = mediaQuery.orientation == Orientation.landscape;
+
+    final appBar = AppBar(
+        title: Text("Despesas pessoais - By: PPeres",
+        style: TextStyle(fontSize: 18 * mediaQuery.textScaleFactor, ),
+        ), 
         backgroundColor: Colors.deepPurpleAccent,
         actions: [
           IconButton(
             icon: Icon(Icons.add, color: Colors.white,), 
             onPressed: () => _openTransactionForm(context),
+          ),
+          if(isLandscape)
+          IconButton(
+            icon: Icon(_showChart ? Icons.list : Icons.bar_chart), 
+            onPressed: () {
+              setState(() {
+                _showChart = !_showChart;
+              });
+            },
           )
         ],
-      ),
+      );
 
+    final availableHeight = mediaQuery.size.height - appBar.preferredSize.height - MediaQuery.of(context).padding.top;
+
+    return Scaffold(
+      appBar: appBar,
       body: SingleChildScrollView(
         child: Column(
-        children: [
-          Chart(_recentTransactions),
-          TransactionList(_transactions, _removeTransaction),
-        ],
-      ),
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            if(_showChart || !isLandscape) 
+            Container(height: availableHeight * (isLandscape ? 0.8 : 0.25 ),
+            child: Chart(_recentTransactions)),
+            if(!_showChart || !isLandscape) 
+              Container(
+                alignment: Alignment.center,
+              height: availableHeight * 0.75,
+              child: TransactionList(_transactions, _removeTransaction)),            
+          ],
+        ),
       ),
       floatingActionButton: FloatingActionButton(
         child: Icon(Icons.add),
